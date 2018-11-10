@@ -1,11 +1,9 @@
-require "rails"
-
 module BatchRollback
   class Railtie < Rails::Railtie
     rake_tasks do
       namespace :db do
         task :migrate do
-          puts "TODO: hook db:migrate"
+          MigrationStep.create_table
         end
 
         task :rollback do
