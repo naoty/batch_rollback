@@ -3,11 +3,24 @@ module BatchRollback
     rake_tasks do
       namespace :batch_rollback do
         task :pre_migrate do
-          puts "TODO: pre_migrate"
+          ActiveRecord::SchemaMigration.create_table
+          ENV["BR_CURRENT_VERSION"] = ActiveRecord::SchemaMigration.all_versions.last
         end
 
         task :post_migrate do
-          puts "TODO: post_migrate"
+          all_versions = ActiveRecord::SchemaMigration.all_versions
+          current_version = ENV.delete("BR_CURRENT_VERSION")
+          target_version = all_versions.last
+          step = all_versions.index(target_version) - (all_versions.index(current_version) || -1)
+
+          if step > 0
+            MigrationStep.create_table
+            MigrationStep.create!(
+              current_version: current_version,
+              target_version: target_version,
+              step: step,
+            )
+          end
         end
 
         task :pre_rollback do

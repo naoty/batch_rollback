@@ -9,8 +9,9 @@ module BatchRollback
         return if table_exists?
 
         connection.create_table(table_name) do |t|
-          t.integer :step, null: false
-          t.string :target_version, null: false
+          t.string :current_version
+          t.string :target_version
+          t.integer :step
         end
       end
     end
