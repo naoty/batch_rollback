@@ -12,23 +12,22 @@ module BatchRollback
           current_version = ENV.delete("BR_CURRENT_VERSION")
           target_version = all_versions.last
           step = all_versions.index(target_version) - (all_versions.index(current_version) || -1)
+          next if step == 0
 
-          if step > 0
-            MigrationStep.create_table
-            MigrationStep.create!(
-              current_version: current_version,
-              target_version: target_version,
-              step: step,
-            )
-          end
+          MigrationStep.create_table
+          MigrationStep.create!(
+            current_version: current_version,
+            target_version: target_version,
+            step: step,
+          )
         end
 
         task :pre_rollback do
-          unless ENV.has_key?("STEP")
-            current_version = ActiveRecord::SchemaMigration.all_versions.last
-            migration_step = MigrationStep.where(target_version: current_version).last
-            ENV["STEP"] = migration_step.step.to_s
-          end
+          next if ENV.has_key?("STEP")
+
+          current_version = ActiveRecord::SchemaMigration.all_versions.last
+          migration_step = MigrationStep.where(target_version: current_version).last
+          ENV["STEP"] = migration_step.step.to_s
         end
       end
 
