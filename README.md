@@ -1,6 +1,6 @@
 # batch_rollback
 
-## Installation
+![screencast](./screencast.gif)
 
 ```rb
 gem "batch_rollback"
