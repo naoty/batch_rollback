@@ -24,11 +24,11 @@ module BatchRollback
         end
 
         task :pre_rollback do
-          puts "TODO: pre_rollback"
-        end
-
-        task :post_rollback do
-          puts "TODO: post_rollback"
+          unless ENV.has_key?("STEP")
+            current_version = ActiveRecord::SchemaMigration.all_versions.last
+            migration_step = MigrationStep.where(target_version: current_version).last
+            ENV["STEP"] = migration_step.step.to_s
+          end
         end
       end
 
@@ -39,9 +39,7 @@ module BatchRollback
       end
 
       if Rake::Task.task_defined?("db:rollback")
-        Rake::Task["db:rollback"].enhance(["batch_rollback:pre_rollback"]) do
-          Rake::Task["batch_rollback:post_rollback"].invoke
-        end
+        Rake::Task["db:rollback"].enhance(["batch_rollback:pre_rollback"])
       end
     end
   end
