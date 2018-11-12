@@ -25,8 +25,11 @@ module BatchRollback
         task :pre_rollback do
           next if ENV.has_key?("STEP")
 
+          MigrationStep.create_table
           current_version = ActiveRecord::SchemaMigration.all_versions.last
           migration_step = MigrationStep.where(target_version: current_version).last
+          next if migration_step.nil?
+
           ENV["STEP"] = migration_step.step.to_s
         end
       end
